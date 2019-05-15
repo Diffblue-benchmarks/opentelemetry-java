@@ -1,0 +1,462 @@
+buildCmd: ./gradlew assemble
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 404.848214286
+#  >methods=99
+#  >complexity=1525
+#  >construction=38.6928571429
+#  >dependency=32.2857142857
+ - target:
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$TimedEvents.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Tracestate$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Links.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Links$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$1.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/resource/v1/Resource$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/resource/v1/Resource.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$TimedEvents$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/SpanOrBuilder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/SpanOrBuilder.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Attributes$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TruncatableString$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TruncatableString.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Status$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Status.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Attributes.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Tracestate.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$SpanKind.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Status.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Status.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TruncatableString.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TruncatableString.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/resource/v1/Resource.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/resource/v1/Resource.java
+# Target TGF: 274.5
+#  >methods=4
+#  >complexity=68
+#  >construction=18.0
+#  >dependency=1.25
+ - target:
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/common/TimeUtils.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/common/TimeUtils.java
+# Target TGF: 372.9
+#  >methods=175
+#  >complexity=2273
+#  >construction=31.1714285714
+#  >dependency=66.0
+ - target:
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$TimedEvents$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$TimedEvents.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Tracestate$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/SpanOrBuilder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/SpanOrBuilder.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Attributes$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TruncatableString$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TruncatableString.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Status$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Status.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Links$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Attributes.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Status.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Status.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Tracestate.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$SpanKind.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/Span$Links.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/Span.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TruncatableString.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TruncatableString.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/resource/v1/Resource.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/resource/v1/Resource.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/resource/v1/Resource$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/resource/v1/Resource.java
+# Target TGF: 336.125
+#  >methods=18
+#  >complexity=321
+#  >construction=20.5
+#  >dependency=12.3333333333
+ - target:
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/trace/TraceId.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/trace/TraceId.java
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/internal/Utils.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/internal/Utils.java
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/trace/BigendianEncoding.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/trace/BigendianEncoding.java
+# Target TGF: 556.135714286
+#  >methods=10
+#  >complexity=214
+#  >construction=72.0
+#  >dependency=2.59285714286
+ - target:
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/internal/Utils.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/internal/Utils.java
+# Target TGF: 5292.0
+#  >methods=12
+#  >complexity=720
+#  >construction=54.0
+#  >dependency=5.0
+ - target:
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/trace/BigendianEncoding.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/trace/BigendianEncoding.java
+   - dir: opencensus-shim/build/classes/java/main
+     file: io/opentelemetry/opencensusshim/internal/Utils.class
+     sourceDir: opencensus-shim/src/main/java
+     sourceFile: io/opentelemetry/opencensusshim/internal/Utils.java
+# Target TGF: 556.135714286
+#  >methods=10
+#  >complexity=214
+#  >construction=72.0
+#  >dependency=2.59285714286
+ - target:
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/internal/Utils.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/internal/Utils.java
+# Target TGF: 254.0
+#  >methods=14
+#  >complexity=239
+#  >construction=12.75
+#  >dependency=10.0
+ - target:
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/trace/TraceId.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/trace/TraceId.java
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/internal/Utils.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/internal/Utils.java
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/trace/BigendianEncoding.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/trace/BigendianEncoding.java
+# Target TGF: 277.630952381
+#  >methods=67
+#  >complexity=738
+#  >construction=29.1928571429
+#  >dependency=20.75
+ - target:
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TraceConfig.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TraceConfig.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/ProbabilitySampler$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/ProbabilitySampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/RateLimitingSampler$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/RateLimitingSampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TraceConfig$SamplerCase.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TraceConfig.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TraceConfigOrBuilder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TraceConfigOrBuilder.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/RateLimitingSampler.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/RateLimitingSampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TraceConfig$1.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TraceConfig.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/ConstantSampler.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/ConstantSampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/ProbabilitySampler.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/ProbabilitySampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/ConstantSampler$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/ConstantSampler.java
+   - dir: sdk/build/classes/java/main
+     file: io/opentelemetry/proto/trace/v1/TraceConfig$Builder.class
+     sourceDir: sdk/build/generated/source/proto/main/java
+     sourceFile: io/opentelemetry/proto/trace/v1/TraceConfig.java
+# Target TGF: 5292.0
+#  >methods=12
+#  >complexity=720
+#  >construction=54.0
+#  >dependency=5.0
+ - target:
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/trace/BigendianEncoding.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/trace/BigendianEncoding.java
+   - dir: api/build/classes/java/main
+     file: io/opentelemetry/internal/Utils.class
+     sourceDir: api/src/main/java
+     sourceFile: io/opentelemetry/internal/Utils.java
